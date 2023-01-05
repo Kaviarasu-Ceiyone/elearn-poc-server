@@ -33,7 +33,9 @@ app.use(morgan("dev"));
 //   console.log("this is my own middleware");
 //   next();
 // });
-
+app.get("/", (req, res) => {
+  res.json("Hello from the backend");
+});
 //route
 // fs.readdirSync("./routes").map((r) => app.use("/api", require(`./routes/${r}`)));
 app.use("/api", authRouter);
