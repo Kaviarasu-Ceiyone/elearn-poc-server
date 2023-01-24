@@ -97,15 +97,11 @@ export const create = async (req, res) => {
 };
 
 export const read = async (req, res) => {
-  try {
-    console.log("HELLO FROM");
-    const course = await Course.findOne({ slug: req.params.slug })
-      .populate("instructor", "_id name")
-      .exec();
-    res.json(course);
-  } catch (err) {
-    console.log(err);
-  }
+  const course = await Course.findOne({ slug: req.params.slug })
+    .populate("instructor", "_id name")
+    .exec();
+  console.log("FINISH READ");
+  return res.json(course);
 };
 
 export const uploadVideo = async (req, res) => {
@@ -322,8 +318,11 @@ export const courses = async (req, res) => {
 
 export const checkEnrollment = async (req, res) => {
   const { courseId } = req.params;
+
+  console.log("COURSE ID", courseId);
+
   //find courses of the currently logged in user
-  const user = await User.findById(req.user._id).exec();
+  const user = await User.findById(req.headers.userid).exec();
   // console.log(user);
   // check if course id is found in user courses array
   let ids = [];
@@ -339,13 +338,15 @@ export const checkEnrollment = async (req, res) => {
 };
 
 export const freeEnrollment = async (req, res) => {
+  console.log("FROM FREE ENROLLMENT", req.body.user._id);
   try {
     // check if course is free or paid
+
     const course = await Course.findById(req.params.courseId).exec();
     if (course.paid) return;
 
     const result = await User.findByIdAndUpdate(
-      req.user._id,
+      req.body.user._id,
       {
         $addToSet: { courses: course._id },
       },

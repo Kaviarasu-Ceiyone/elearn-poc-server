@@ -62,6 +62,6 @@ router.post("/free-enrollment/:courseId", requireSignin, freeEnrollment);
 
 router.get("/user-courses", requireSignin, userCourses);
 
-router.get("/user/course/:slug", requireSignin, isEnrolled, read);
+router.get("/user/course/:slug", requireSignin, read);
 
 export const courseRouter = router;

@@ -3,6 +3,7 @@ import { genHashedPassword, comparePassword } from "../utils/auth.js";
 import jwt from "jsonwebtoken";
 import AWS from "aws-sdk";
 import { nanoid } from "nanoid";
+import Cookies from "js-cookie";
 
 const awsConfig = {
   accessKeyId: process.AWS_ACCESS_KEY_ID,
@@ -52,7 +53,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).exec();
-    console.log(user);
+
     if (!user) return res.status(400).send("No user found");
 
     //Check password
@@ -68,12 +69,14 @@ export const login = async (req, res) => {
     // return user and token to client, exclude hashed password
     user.password = undefined;
     // send token in cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      // secure: true, // only works on https
-    });
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   // secure: true, // only works on https
+    // });
 
-    res.json(user);
+    const array = [user, { token }];
+    console.log(array[0]);
+    res.json([user, { token }]);
   } catch (err) {
     console.log(err);
     return res.status(400).send("Error, try again");
@@ -90,11 +93,16 @@ export const logout = async (req, res) => {
 };
 
 export const currentUser = async (req, res) => {
+  console.log("FROM CURRENT USER");
   try {
-    const user = await User.findById(req.user._id).select("-password").exec();
+    console.log("INSIDE CURRENT USER");
+    const user = await User.findById(req.headers.userid)
+      .select("-password")
+      .exec();
     console.log("CURRENT_USER", user);
     return res.json({ ok: true });
   } catch (err) {
+    console.log("THIS IS CURRENT USER ERROR");
     console.log(err);
   }
 };
